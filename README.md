@@ -1,43 +1,36 @@
-# NASS MAZAO 255 Business Manager
+# NASS MAZAO 255 Enterprise
 
-Toleo hili ni production foundation ya Windows desktop app.
+Windows desktop app kwa biashara ya mazao: mtaji, manunuzi, mauzo, stoo, matumizi, madeni, backup na auto-update.
 
-## Iliyoongezwa
-- Electron desktop app kwa Windows 11
-- SQLite local database
-- Database migrations kwa updates zijazo bila kufuta data
-- Auto update kupitia GitHub Releases
-- Backup kabla ya update na kabla ya format
-- CRUD: Mtaji, Manunuzi, Mauzo, Stoo, Matumizi, Madeni, Mazao
-- Dashboard ya faida/hasara na Financial Discipline Score
-- Audit log ya mabadiliko
-- GitHub Actions workflow ya kutengeneza installer
-
-## Kuanza kwenye PC
+## Kutumia local
 ```bash
 npm install
 npm start
 ```
 
-## Kutengeneza installer
+## Kutengeneza Windows installer
 ```bash
+npm install
 npm run dist
 ```
-
 Installer itatokea kwenye folder `release`.
 
-## Kutoa update mpya
-```bash
-npm version patch
-git push
-git push --tags
-```
-Kisha workflow ya GitHub itajenga release.
+## GitHub Actions
+Workflow iko hapa:
+`.github/workflows/build.yml`
 
-## Repo config
-Package imeunganishwa na:
-- GitHub owner: `issanass`
-- Repo: `nass-mazao-255`
-- Visibility: private
+GitHub: Actions → Build Windows Installer → Run workflow → Artifacts.
 
-Kwa private repo, hakikisha GitHub Actions ina secret inayoitwa `GH_TOKEN` yenye ruhusa ya repo/workflow.
+## Auto Update
+Auto update imewekwa kutumia GitHub Releases:
+owner: `issanass11`
+repo: `nass-mazao-255`
+
+Ili kutoa update:
+1. Badilisha version kwenye `package.json`, mfano `1.0.1`.
+2. Push GitHub.
+3. Run workflow `Release Windows Installer`.
+4. App iliyopo itaweza kuona update kupitia GitHub Releases.
+
+## Data
+Data zinahifadhiwa kwenye userData ya Windows, si ndani ya app. Update haitafuta data.

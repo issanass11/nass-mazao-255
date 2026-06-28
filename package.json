@@ -1,43 +1,44 @@
 {
   "name": "nass-mazao-255",
-  "version": "2.0.1",
-  "description": "NASS MAZAO 255 Business Manager - Production Electron Desktop App",
+  "version": "1.0.0",
+  "description": "NASS MAZAO 255 Enterprise Business Manager for crops trading",
   "main": "src/main/main.js",
-  "author": "NASS MAZAO 255",
+  "author": "Issa Nass",
   "license": "MIT",
   "private": true,
   "scripts": {
     "start": "electron .",
-    "dev": "electron .",
-    "dist": "electron-builder --win nsis --x64",
-    "publish": "electron-builder --win nsis --x64 --publish always",
-    "release:patch": "npm version patch && npm run publish"
+    "dist": "electron-builder --win nsis --publish=never",
+    "release": "electron-builder --win nsis --publish=always"
   },
   "dependencies": {
-    "electron-updater": "^6.3.9",
-    "sqlite3": "^5.1.7"
+    "@electron/remote": "latest",
+    "better-sqlite3": "latest",
+    "electron-updater": "latest"
   },
   "devDependencies": {
-    "electron": "^31.7.7",
-    "electron-builder": "^24.13.3"
+    "electron": "latest",
+    "electron-builder": "latest"
   },
   "build": {
-    "appId": "com.nassmazao255.businessmanager",
-    "productName": "NASS MAZAO 255 Business Manager",
+    "appId": "com.issanass.nassmazao255",
+    "productName": "NASS MAZAO 255",
     "directories": {
       "output": "release"
     },
     "files": [
       "src/**/*",
-      "package.json",
-      "build/**/*"
+      "package.json"
     ],
-    "asarUnpack": [
-      "node_modules/sqlite3/**/*"
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "issanass11",
+        "repo": "nass-mazao-255"
+      }
     ],
     "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico"
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,
@@ -45,14 +46,6 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "NASS MAZAO 255"
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "issanass11",
-        "repo": "nass-mazao-255",
-        "releaseType": "release"
-      }
-    ]
+    }
   }
 }
