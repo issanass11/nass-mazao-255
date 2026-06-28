@@ -14,7 +14,7 @@
   "dependencies": {
     "@electron/remote": "latest",
     "better-sqlite3": "latest",
-    "electron-updater": "latest"
+"electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "electron": "latest",
