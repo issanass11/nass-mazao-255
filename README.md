@@ -1,65 +1,43 @@
 # NASS MAZAO 255 Business Manager
 
-Hii ni Electron Windows desktop app yenye:
+Toleo hili ni production foundation ya Windows desktop app.
 
-- Dashboard ya mtaji, mauzo, matumizi, faida/hasara
-- Taarifa za zao moja moja
-- Manunuzi, mauzo, stoo, madeni, matumizi
-- Kufuta taarifa moja moja
-- Format taarifa zote kwa kuanza upya
-- Backup kabla ya format na kabla ya update
-- Mfumo wa Auto Update kupitia electron-updater
-- Data zinahifadhiwa tofauti na files za app ili update zisifute taarifa zako
+## Iliyoongezwa
+- Electron desktop app kwa Windows 11
+- SQLite local database
+- Database migrations kwa updates zijazo bila kufuta data
+- Auto update kupitia GitHub Releases
+- Backup kabla ya update na kabla ya format
+- CRUD: Mtaji, Manunuzi, Mauzo, Stoo, Matumizi, Madeni, Mazao
+- Dashboard ya faida/hasara na Financial Discipline Score
+- Audit log ya mabadiliko
+- GitHub Actions workflow ya kutengeneza installer
 
-## Kuitumia kwenye Windows 11
-
-1. Install Node.js LTS kwenye PC yako.
-2. Fungua folder hii kwenye VS Code au Command Prompt.
-3. Run:
-
+## Kuanza kwenye PC
 ```bash
 npm install
 npm start
 ```
 
-## Kutengeneza Installer ya Windows
-
+## Kutengeneza installer
 ```bash
 npm run dist
 ```
 
-Installer itapatikana kwenye folder:
+Installer itatokea kwenye folder `release`.
 
+## Kutoa update mpya
 ```bash
-release/
+npm version patch
+git push
+git push --tags
 ```
+Kisha workflow ya GitHub itajenga release.
 
-## Auto Update
+## Repo config
+Package imeunganishwa na:
+- GitHub owner: `issanass`
+- Repo: `nass-mazao-255`
+- Visibility: private
 
-Auto update inatumia GitHub Releases. Badili sehemu hii kwenye `package.json`:
-
-```json
-"owner": "issanass11",
-"repo": "nass-mazao-255-business-manager"
-```
-
-Kisha tengeneza GitHub repository yenye jina hilo, halafu publish release mpya kwa kuongeza version kwenye package.json.
-
-Mfano version mpya:
-
-```json
-"version": "1.0.1"
-```
-
-Kisha run:
-
-```bash
-npm run publish
-```
-
-App iliyopo kwenye PC itaweza kuona update mpya kupitia kitufe cha `Angalia Updates`.
-
-
-## Faili ya ziada
-
-Angalia `GITHUB_UPDATE_GUIDE.md` kwa hatua kamili za kuunganisha GitHub Releases.
+Kwa private repo, hakikisha GitHub Actions ina secret inayoitwa `GH_TOKEN` yenye ruhusa ya repo/workflow.
