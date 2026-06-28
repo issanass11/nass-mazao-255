@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NASS MAZAO 255</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">NM</div>
+        <div><h1>NASS MAZAO 255</h1><p>Business Manager</p></div>
+      </div>
+      <button class="nav active" data-tab="dashboard">Dashboard</button>
+      <button class="nav" data-tab="capital">Mtaji</button>
+      <button class="nav" data-tab="crops">Mazao</button>
+      <button class="nav" data-tab="purchases">Manunuzi</button>
+      <button class="nav" data-tab="sales">Mauzo</button>
+      <button class="nav" data-tab="stock">Stoo</button>
+      <button class="nav" data-tab="expenses">Matumizi</button>
+      <button class="nav" data-tab="debts">Madeni</button>
+      <button class="nav" data-tab="settings">Settings & Updates</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div><h2 id="pageTitle">Dashboard</h2><p id="todayText"></p></div>
+        <div class="actions">
+          <button id="languageBtn">English</button>
+          <button id="backupBtn">Backup</button>
+          <button id="formatBtn" class="danger">Format</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="tab active">
+        <div class="cards">
+          <div class="card"><span>Mtaji</span><strong id="totalCapital">0</strong></div>
+          <div class="card"><span>Mauzo</span><strong id="totalSales">0</strong></div>
+          <div class="card"><span>Matumizi</span><strong id="totalExpenses">0</strong></div>
+          <div class="card"><span>Faida/Hasara</span><strong id="profitLoss">0</strong></div>
+        </div>
+        <div class="panel">
+          <h3>Financial Discipline Score</h3>
+          <div class="score"><div id="scoreBar"></div></div>
+          <p id="scoreText"></p>
+        </div>
+      </section>
+
+      <section id="capital" class="tab crud" data-store="capital"><h3>Mtaji</h3></section>
+      <section id="crops" class="tab crud" data-store="crops"><h3>Taarifa za zao moja moja</h3></section>
+      <section id="purchases" class="tab crud" data-store="purchases"><h3>Manunuzi</h3></section>
+      <section id="sales" class="tab crud" data-store="sales"><h3>Mauzo</h3></section>
+      <section id="stock" class="tab crud" data-store="stock"><h3>Stoo</h3></section>
+      <section id="expenses" class="tab crud" data-store="expenses"><h3>Matumizi binafsi/biashara</h3></section>
+      <section id="debts" class="tab crud" data-store="debts"><h3>Madeni</h3></section>
+
+      <section id="settings" class="tab">
+        <div class="panel">
+          <h3>Updates</h3>
+          <p>App hii ina mfumo wa kuangalia update bila kufuta data zako.</p>
+          <button id="checkUpdateBtn">Angalia Updates</button>
+          <button id="downloadUpdateBtn">Pakua Update</button>
+          <button id="installUpdateBtn">Install Update</button>
+          <p id="updateStatus">Hakuna taarifa ya update bado.</p>
+        </div>
+        <div class="panel">
+          <h3>Usalama wa Data</h3>
+          <p>Data zinahifadhiwa kwenye sehemu salama ya Windows userData, si ndani ya files za app. Hii inalinda taarifa wakati wa update.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
