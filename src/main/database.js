@@ -35,7 +35,7 @@ function initDatabase() {
     );
     CREATE TABLE IF NOT EXISTS transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT NOT NULL CHECK(type IN ('purchase','sale','expense','debt_in','debt_out','capital')),
+      type TEXT NOT NULL CHECK(type IN ('purchase','sale','expense','debt_in','debt_out','capital','loss')),
       crop_id INTEGER,
       person TEXT,
       quantity REAL DEFAULT 0,
@@ -56,6 +56,17 @@ function initDatabase() {
       transaction_id INTEGER,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(crop_id) REFERENCES crops(id)
+    );
+    CREATE TABLE IF NOT EXISTS markets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      location TEXT,
+      crop TEXT,
+      buy_price REAL DEFAULT 0,
+      sell_price REAL DEFAULT 0,
+      contact TEXT,
+      note TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
   const count = db.prepare('SELECT COUNT(*) as n FROM crops').get().n;
@@ -78,11 +89,15 @@ function dashboard() {
       COALESCE(SUM(CASE WHEN type='capital' THEN amount ELSE 0 END),0) capital,
       COALESCE(SUM(CASE WHEN type='purchase' THEN amount ELSE 0 END),0) purchases,
       COALESCE(SUM(CASE WHEN type='sale' THEN amount ELSE 0 END),0) sales,
-      COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END),0) expenses,
+      COALESCE(SUM(CASE WHEN type IN ('expense','loss') THEN amount ELSE 0 END),0) expenses,
       COALESCE(SUM(CASE WHEN type IN ('debt_in','debt_out') THEN amount-paid ELSE 0 END),0) debts
     FROM transactions
   `).get();
   row.profit = row.sales - row.purchases - row.expenses;
+  row.cashflow = row.capital + row.sales - row.purchases - row.expenses;
+  row.stock_value = Math.max(0, row.purchases - row.sales);
+  const expensePressure = row.sales > 0 ? (row.expenses / row.sales) * 100 : 0;
+  row.discipline_score = Math.max(0, Math.min(100, 90 - expensePressure + (row.profit > 0 ? 10 : -20)));
   return row;
 }
 
@@ -121,6 +136,19 @@ function addTransaction(data) {
 function listCrops() { return getDb().prepare('SELECT * FROM crops ORDER BY name').all(); }
 function addCrop(name, unit='kg') { return getDb().prepare('INSERT OR IGNORE INTO crops(name, unit) VALUES (?, ?)').run(name, unit); }
 function stockReport() { return getDb().prepare(`SELECT c.name, c.unit, COALESCE(SUM(s.quantity_in-s.quantity_out),0) stock FROM crops c LEFT JOIN stock_moves s ON s.crop_id=c.id GROUP BY c.id ORDER BY c.name`).all(); }
-function resetAll() { backupDatabase('before-format'); getDb().exec('DELETE FROM stock_moves; DELETE FROM transactions;'); return true; }
+function listMarkets() { return getDb().prepare('SELECT * FROM markets ORDER BY id DESC LIMIT 300').all(); }
+function addMarket(data) { return getDb().prepare('INSERT INTO markets(name,location,crop,buy_price,sell_price,contact,note) VALUES (@name,@location,@crop,@buy_price,@sell_price,@contact,@note)').run({name:data.name||'',location:data.location||'',crop:data.crop||'',buy_price:Number(data.buy_price||0),sell_price:Number(data.sell_price||0),contact:data.contact||'',note:data.note||''}); }
+function aiAdvice() {
+  const d = dashboard();
+  const advice = [];
+  if (d.profit < 0) advice.push({title:'Hatari ya Hasara', message:'Biashara iko kwenye hasara. Punguza matumizi, hakiki bei ya kununua, na uza stock yenye margin nzuri kwanza.'});
+  else advice.push({title:'Faida Ipo', message:'Endelea kurudisha sehemu ya faida kwenye mtaji na stock. Usitumie faida yote kwenye matumizi binafsi.'});
+  if (d.expenses > d.sales * 0.2 && d.sales > 0) advice.push({title:'Matumizi Yamezidi', message:'Matumizi yamezidi 20% ya mauzo. Weka bajeti ya mwezi na ruhusu matumizi muhimu tu.'});
+  advice.push({title:'Kanuni ya Mtaji', message:'Gawa mapato: 50% mtaji/stock, 20% akiba au uwekezaji, 20% matumizi binafsi, 10% dharura.'});
+  advice.push({title:'Masoko', message:'Linganisha bei za masoko kabla ya kuuza. Uza kwenye soko lenye tofauti kubwa kati ya bei ya kununua na kuuza.'});
+  advice.push({title:'Madeni', message:'Rekodi deni kila siku na weka tarehe ya kufuatilia. Madeni yasiyodhibitiwa huua cashflow.'});
+  return advice;
+}
+function resetAll() { backupDatabase('before-format'); getDb().exec('DELETE FROM stock_moves; DELETE FROM transactions; DELETE FROM markets;'); return true; }
 
-module.exports = { initDatabase, dashboard, listTransactions, addTransaction, listCrops, addCrop, stockReport, backupDatabase, resetAll };
+module.exports = { initDatabase, dashboard, listTransactions, addTransaction, listCrops, addCrop, stockReport, listMarkets, addMarket, aiAdvice, backupDatabase, resetAll };

@@ -1,11 +1,80 @@
-<!doctype html><html><head><meta charset="UTF-8"><title>NASS MAZAO 255</title><link rel="stylesheet" href="styles.css"></head><body>
-<div class="app">
-  <aside><h1>NASS<br><span>MAZAO 255</span></h1><button data-page="dashboard">Dashboard</button><button data-page="add">Ongeza Taarifa</button><button data-page="stock">Stoo</button><button data-page="settings">Settings</button></aside>
-  <main>
-    <header><div><h2 id="title">Dashboard</h2><p>Business Manager ya mazao</p></div><div><button id="lang">English</button><button id="updates">Angalia Updates</button></div></header>
-    <section id="dashboard" class="page active"><div class="cards" id="cards"></div><h3>Taarifa za karibuni</h3><table><thead><tr><th>Aina</th><th>Zao</th><th>Mtu/Kampuni</th><th>Kiasi</th><th>Tarehe</th></tr></thead><tbody id="txRows"></tbody></table></section>
-    <section id="add" class="page"><div class="panel"><h3>Ongeza taarifa mpya</h3><form id="txForm"><div class="grid"><label>Aina<select name="type"><option value="capital">Mtaji</option><option value="purchase">Manunuzi</option><option value="sale">Mauzo</option><option value="expense">Matumizi</option><option value="debt_in">Deni ninalodai</option><option value="debt_out">Deni ninalodaiwa</option></select></label><label>Zao<select name="crop_id" id="cropSelect"></select></label><label>Mtu/Kampuni<input name="person"></label><label>Kiasi/kg<input name="quantity" type="number" step="0.01"></label><label>Bei kwa unit<input name="unit_price" type="number" step="0.01"></label><label>Jumla<input name="amount" type="number" step="0.01"></label><label>Iliyolipwa<input name="paid" type="number" step="0.01"></label><label>Tarehe<input name="date" type="date"></label></div><label>Maelezo<textarea name="note"></textarea></label><button class="primary">Hifadhi</button></form></div></section>
-    <section id="stock" class="page"><div class="panel"><h3>Stoo ya Mazao</h3><table><thead><tr><th>Zao</th><th>Stock</th><th>Unit</th></tr></thead><tbody id="stockRows"></tbody></table></div></section>
-    <section id="settings" class="page"><div class="panel"><h3>Settings</h3><button id="backup">Tengeneza Backup</button><button id="format" class="danger">Format Taarifa Zote</button><p id="status"></p></div></section>
-  </main>
-</div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NASS MAZAO 255 Business Manager</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">NM</div>
+        <div><h1>NASS MAZAO 255</h1><p>Business Manager</p></div>
+      </div>
+      <nav>
+        <button class="nav active" data-page="dashboard">Dashboard</button>
+        <button class="nav" data-page="purchases">Manunuzi</button>
+        <button class="nav" data-page="sales">Mauzo</button>
+        <button class="nav" data-page="profitloss">Faida & Hasara</button>
+        <button class="nav" data-page="markets">Masoko</button>
+        <button class="nav" data-page="ai">Ushauri wa AI</button>
+        <button class="nav" data-page="records">Taarifa Zote</button>
+        <button class="nav" data-page="settings">Settings</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div><h2 id="pageTitle">Dashboard</h2><p id="pageSub">Muhtasari wa biashara yako ya mazao</p></div>
+        <div class="top-actions">
+          <button id="backupBtn">Backup</button>
+          <button id="updatesBtn">Angalia Updates</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="page active">
+        <div class="hero-card">
+          <div><span class="eyebrow">NASS MAZAO 255</span><h3>Dashboard ya Biashara</h3><p>Angalia mtaji, mauzo, manunuzi, faida/hasara, madeni na nidhamu ya matumizi kwa haraka.</p></div>
+          <div class="hero-logo">MAZAO<br>255</div>
+        </div>
+        <div id="summaryCards" class="cards"></div>
+        <div class="two-col">
+          <div class="panel"><h3>Faida na Hasara kwa ufupi</h3><div id="profitBrief" class="brief"></div></div>
+          <div class="panel"><h3>Financial Discipline Score</h3><div id="scoreBox" class="score"></div><p class="muted">Lengo: tumia faida kwa nidhamu, linda mtaji, ongeza stock na akiba.</p></div>
+        </div>
+      </section>
+
+      <section id="purchases" class="page">
+        <div class="panel"><h3>Ongeza Manunuzi</h3><form id="purchaseForm" class="entry-form"></form></div>
+      </section>
+
+      <section id="sales" class="page">
+        <div class="panel"><h3>Ongeza Mauzo</h3><form id="saleForm" class="entry-form"></form></div>
+      </section>
+
+      <section id="profitloss" class="page">
+        <div class="panel"><h3>Faida & Hasara</h3><div id="plCards" class="cards compact"></div><table><thead><tr><th>Kipengele</th><th>Kiasi</th></tr></thead><tbody id="plRows"></tbody></table></div>
+      </section>
+
+      <section id="markets" class="page">
+        <div class="panel"><h3>Masoko ya Mazao</h3><p class="muted">Hifadhi taarifa za masoko, wanunuzi, bei na eneo ili ujue pa kuuza kwa faida.</p><form id="marketForm" class="grid-form"><label>Soko/Jina<input name="name" required></label><label>Eneo<input name="location"></label><label>Zao<input name="crop"></label><label>Bei ya kununua/kg<input name="buy_price" type="number"></label><label>Bei ya kuuza/kg<input name="sell_price" type="number"></label><label>Mawasiliano<input name="contact"></label><label class="wide">Maelezo<textarea name="note"></textarea></label><button class="primary">Hifadhi Soko</button></form><table><thead><tr><th>Soko</th><th>Eneo</th><th>Zao</th><th>Bei Kununua</th><th>Bei Kuuza</th><th>Mawasiliano</th></tr></thead><tbody id="marketRows"></tbody></table></div>
+      </section>
+
+      <section id="ai" class="page">
+        <div class="panel"><h3>Ushauri wa AI wa Biashara</h3><div id="aiAdvice" class="advice-list"></div></div>
+      </section>
+
+      <section id="records" class="page">
+        <div class="panel"><h3>Taarifa Zote Muhimu</h3><form id="generalForm" class="entry-form"></form><table><thead><tr><th>Aina</th><th>Zao</th><th>Mtu/Kampuni</th><th>Kiasi</th><th>Kiasi/kg</th><th>Tarehe</th><th>Maelezo</th></tr></thead><tbody id="recordsRows"></tbody></table></div>
+      </section>
+
+      <section id="settings" class="page">
+        <div class="panel settings"><h3>Settings</h3><button id="manualBackup">Tengeneza Backup</button><button id="formatAll" class="danger">Format Taarifa Zote</button><p id="status" class="muted"></p></div>
+      </section>
+    </main>
+  </div>
+<script src="app.js"></script>
+</body>
+</html>

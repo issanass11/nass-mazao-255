@@ -6,6 +6,9 @@ contextBridge.exposeInMainWorld('api', {
   listCrops: () => ipcRenderer.invoke('crops:list'),
   addCrop: data => ipcRenderer.invoke('crops:add', data),
   stockReport: () => ipcRenderer.invoke('stock:report'),
+  listMarkets: () => ipcRenderer.invoke('markets:list'),
+  addMarket: data => ipcRenderer.invoke('markets:add', data),
+  aiAdvice: () => ipcRenderer.invoke('ai:advice'),
   createBackup: () => ipcRenderer.invoke('backup:create'),
   formatAll: () => ipcRenderer.invoke('format:all'),
   checkUpdates: () => ipcRenderer.invoke('updates:check')

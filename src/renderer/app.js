@@ -1,16 +1,29 @@
+const fmt = n => `TSh ${Number(n || 0).toLocaleString()}`;
+const typeNames = {capital:'Mtaji',purchase:'Manunuzi',sale:'Mauzo',expense:'Matumizi',debt_in:'Deni Ninalodai',debt_out:'Deni Ninalodaiwa',loss:'Hasara'};
+const pageNames={dashboard:['Dashboard','Muhtasari wa biashara yako ya mazao'],purchases:['Manunuzi','Ingiza taarifa za ununuzi wa mazao'],sales:['Mauzo','Ingiza taarifa za mauzo na mapato'],profitloss:['Faida & Hasara','Tambua afya ya biashara kwa haraka'],markets:['Masoko','Hifadhi masoko, bei na wanunuzi'],ai:['Ushauri wa AI','Mapendekezo ya kuboresha biashara'],records:['Taarifa Zote','Ingiza na angalia taarifa zote muhimu'],settings:['Settings','Backup, format na updates']};
 let crops=[];
-const fmt=n=>`TSh ${Number(n||0).toLocaleString()}`;
-async function refresh(){
- const d=await api.dashboard();
- cards.innerHTML=[['Mtaji',d.capital],['Manunuzi',d.purchases],['Mauzo',d.sales],['Matumizi',d.expenses],['Faida/Hasara',d.profit]].map(x=>`<div class="card"><small>${x[0]}</small><b>${fmt(x[1])}</b></div>`).join('');
- const tx=await api.listTransactions();
- txRows.innerHTML=tx.map(t=>`<tr><td>${t.type}</td><td>${t.crop_name||'-'}</td><td>${t.person||'-'}</td><td>${fmt(t.amount)}</td><td>${t.date}</td></tr>`).join('');
- crops=await api.listCrops(); cropSelect.innerHTML='<option value="">-- Hakuna --</option>'+crops.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
- const st=await api.stockReport(); stockRows.innerHTML=st.map(s=>`<tr><td>${s.name}</td><td>${Number(s.stock).toLocaleString()}</td><td>${s.unit}</td></tr>`).join('');
+function transactionForm(type='purchase'){
+ const typeInput = type==='general' ? `<label>Aina<select name="type"><option value="capital">Mtaji</option><option value="purchase">Manunuzi</option><option value="sale">Mauzo</option><option value="expense">Matumizi</option><option value="debt_in">Deni Ninalodai</option><option value="debt_out">Deni Ninalodaiwa</option><option value="loss">Hasara</option></select></label>` : `<input type="hidden" name="type" value="${type}">`;
+ return `<div class="grid">${typeInput}<label>Zao<select name="crop_id" class="cropSelect"><option value="">-- Chagua zao --</option></select></label><label>Mtu/Kampuni<input name="person" placeholder="Mf. Mnunuzi/Mkulima"></label><label>Kiasi/kg<input name="quantity" type="number" step="0.01"></label><label>Bei kwa kg/unit<input name="unit_price" type="number" step="0.01"></label><label>Jumla<input name="amount" type="number" step="0.01" placeholder="Inaweza kujazwa automatic"></label><label>Iliyolipwa<input name="paid" type="number" step="0.01"></label><label>Tarehe<input name="date" type="date"></label><label class="wide">Maelezo<textarea name="note" placeholder="Andika maelezo muhimu"></textarea></label></div><button class="primary">Hifadhi Taarifa</button>`;
 }
-document.querySelectorAll('aside button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(b.dataset.page).classList.add('active');title.textContent=b.textContent;refresh();});
-txForm.onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(txForm));await api.addTransaction(data);txForm.reset();await refresh();alert('Imehifadhiwa');};
-backup.onclick=async()=>{const p=await api.createBackup();status.textContent='Backup imehifadhiwa: '+p;};
-format.onclick=async()=>{const ok=await api.formatAll();if(ok){status.textContent='Taarifa zimefutwa, backup imehifadhiwa.';refresh();}};
-updates.onclick=async()=>{status.textContent='Inaangalia updates...';try{await api.checkUpdates();status.textContent='Update check imekamilika.'}catch(e){status.textContent='Hakuna update au mtandao una shida.'}};
-refresh();
+function fillForms(){purchaseForm.innerHTML=transactionForm('purchase');saleForm.innerHTML=transactionForm('sale');generalForm.innerHTML=transactionForm('general');document.querySelectorAll('.entry-form').forEach(f=>{f.onsubmit=saveTx;});populateCropSelects();}
+function populateCropSelects(){document.querySelectorAll('.cropSelect').forEach(s=>{const val=s.value;s.innerHTML='<option value="">-- Chagua zao --</option>'+crops.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');s.value=val;});}
+async function refresh(){
+ const d=await api.dashboard(); crops=await api.listCrops(); populateCropSelects();
+ const profit=d.profit||0, score=Math.max(0,Math.min(100,Math.round(d.discipline_score||0)));
+ summaryCards.innerHTML=[['Mtaji',d.capital],['Manunuzi',d.purchases],['Mauzo',d.sales],['Matumizi',d.expenses],['Faida/Hasara',profit],['Madeni',d.debts],['Stoo Thamani Makadirio',d.stock_value],['Cashflow',d.cashflow]].map(([a,b])=>`<div class="card ${a.includes('Faida')?(b>=0?'positive':'negative'):''}"><small>${a}</small><b>${fmt(b)}</b></div>`).join('');
+ profitBrief.innerHTML=[['Mauzo yote',d.sales],['Gharama za manunuzi',d.purchases],['Matumizi',d.expenses],['Faida/Hasara',profit]].map(r=>`<div class="brief-row"><span>${r[0]}</span><b>${fmt(r[1])}</b></div>`).join('');
+ scoreBox.innerHTML=`<b>${score}/100</b><div class="bar"><span style="width:${score}%"></span></div><span>${score>=75?'Nidhamu nzuri. Endelea kulinda mtaji.':score>=50?'Wastani. Punguza matumizi yasiyo ya lazima.':'Hatari. Matumizi/manunuzi yanahitaji udhibiti.'}</span>`;
+ plCards.innerHTML=[['Faida Halisi',profit],['Hasara/Matumizi',d.expenses],['Madeni Bado',d.debts]].map(([a,b])=>`<div class="card"><small>${a}</small><b>${fmt(b)}</b></div>`).join('');
+ plRows.innerHTML=[['Mtaji',d.capital],['Mauzo',d.sales],['Manunuzi',d.purchases],['Matumizi',d.expenses],['Faida/Hasara',profit],['Cashflow',d.cashflow]].map(r=>`<tr><td>${r[0]}</td><td>${fmt(r[1])}</td></tr>`).join('');
+ const tx=await api.listTransactions(); recordsRows.innerHTML=tx.map(t=>`<tr><td>${typeNames[t.type]||t.type}</td><td>${t.crop_name||'-'}</td><td>${t.person||'-'}</td><td>${fmt(t.amount)}</td><td>${Number(t.quantity||0).toLocaleString()}</td><td>${t.date}</td><td>${t.note||''}</td></tr>`).join('');
+ const markets=await api.listMarkets(); marketRows.innerHTML=markets.map(m=>`<tr><td>${m.name}</td><td>${m.location||'-'}</td><td>${m.crop||'-'}</td><td>${fmt(m.buy_price)}</td><td>${fmt(m.sell_price)}</td><td>${m.contact||'-'}</td></tr>`).join('');
+ aiAdvice.innerHTML=(await api.aiAdvice()).map(a=>`<div class="advice"><b>${a.title}</b><span>${a.message}</span></div>`).join('');
+}
+async function saveTx(e){e.preventDefault();const data=Object.fromEntries(new FormData(e.target));await api.addTransaction(data);e.target.reset();await refresh();alert('Taarifa imehifadhiwa');}
+marketForm.onsubmit=async e=>{e.preventDefault();await api.addMarket(Object.fromEntries(new FormData(marketForm)));marketForm.reset();await refresh();alert('Soko limehifadhiwa');};
+document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(b.dataset.page).classList.add('active');pageTitle.textContent=pageNames[b.dataset.page][0];pageSub.textContent=pageNames[b.dataset.page][1];refresh();});
+backupBtn.onclick=manualBackup.onclick=async()=>{const p=await api.createBackup();status.textContent='Backup imehifadhiwa: '+p;alert('Backup imehifadhiwa');};
+formatAll.onclick=async()=>{const ok=await api.formatAll();if(ok){status.textContent='Taarifa zimefutwa na backup imehifadhiwa.';await refresh();}};
+updatesBtn.onclick=async()=>{try{await api.checkUpdates();alert('Update check imekamilika. Kama toleo jipya lipo, app itakuonyesha.')}catch(e){alert('Hakuna update au mtandao una shida.')}};
+fillForms();refresh();
