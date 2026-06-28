@@ -1,6 +1,6 @@
 {
   "name": "nass-mazao-255",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "NASS MAZAO 255 Business Manager - Production Electron Desktop App",
   "main": "src/main/main.js",
   "author": "NASS MAZAO 255",
